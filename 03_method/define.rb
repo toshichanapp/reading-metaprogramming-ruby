@@ -41,3 +41,32 @@ end
 # 次の動作をする OriginalAccessor モジュール を実装する
 # - OriginalAccessorモジュールはincludeされたときのみ、my_attr_accessorメソッドを定義すること
 # - my_attr_accessorはgetter/setterに加えて、boolean値を代入した際のみ真偽値判定を行うaccessorと同名の?メソッドができること
+
+module OriginalAccessor
+  # https://www.techscore.com/blog/2013/03/01/rails-include%E3%81%95%E3%82%8C%E3%81%9F%E6%99%82%E3%81%AB%E3%82%AF%E3%83%A9%E3%82%B9%E3%83%A1%E3%82%BD%E3%83%83%E3%83%89%E3%81%A8%E3%82%A4%E3%83%B3%E3%82%B9%E3%82%BF%E3%83%B3%E3%82%B9%E3%83%A1/
+  # ライブラリを使用する時に、提供されているモジュールを include すれば良いのか、extend すれば良いのか迷うこともあると思います。
+  # えぇーい、面倒くさい！ ということで生まれたかどうかは知りませんが、モジュールに関する頻出パターンをご紹介します。
+  # 「モジュールが include された時に、クラスメソッドとインスタンスメソッドの両方を追加する」という手法です。
+  # この手法を使うと、何も考えずに include すれば便利なクラスメソッドやインスタンスメソッドが使えるようになるモジュールを作ることができます。
+
+  def self.included(klass)
+    klass.extend(ClassMethods)
+  end
+
+  module ClassMethods
+    def my_attr_accessor(arg)
+      define_method(arg) do
+        instance_variable_get("@#{arg}")
+      end
+
+      define_method("#{arg}=") do |n|
+        if [true, false].include?(n)
+          define_singleton_method("#{arg}?") do
+            !!send(arg)
+          end
+        end
+        instance_variable_set("@#{arg}", n)
+      end
+    end
+  end
+end
