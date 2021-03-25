@@ -1,6 +1,11 @@
 # Q1.
 # 次の動作をする A1 class を実装する
 # - "//" を返す "//"メソッドが存在すること
+class A1
+  define_method('//') do
+    '//'
+  end
+end
 
 # Q2.
 # 次の動作をする A2 class を実装する
@@ -11,6 +16,26 @@
 #   - 引数がnilの場合は、dev_teamメソッドを呼ぶこと
 # - また、2で定義するメソッドは以下を満たすものとする
 #   - メソッドが定義されるのは同時に生成されるオブジェクトのみで、別のA2インスタンスには（同じ値を含む配列を生成時に渡さない限り）定義されない
+class A2
+
+  def initialize(args)
+    args.each do |arg|
+      method_name = "hoge_#{arg}"
+      # define_methodだと
+      # NoMethodError: undefined method `define_method' for #<A2:0x000055f44913f1f8>
+      # Did you mean?  define_singleton_method
+      define_singleton_method(method_name) do |n|
+        return dev_team if n.nil?
+        method_name * n
+      end
+    end
+  end
+
+  def dev_team
+    'SmartHR Dev Team'
+  end
+end
+
 
 # Q3.
 # 次の動作をする OriginalAccessor モジュール を実装する
