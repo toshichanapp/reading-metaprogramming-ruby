@@ -58,6 +58,8 @@ module TryOver3::OriginalAccessor2
           self.class.define_method "#{attr_sym}?" do
             @attr == true
           end
+        elsif respond_to?("#{attr_sym}?")
+          self.class.undef_method("#{attr_sym}?")
         end
         @attr = value
       end
