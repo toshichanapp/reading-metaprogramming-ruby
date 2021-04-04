@@ -5,7 +5,15 @@ TryOver3 = Module.new
 # - `test_` から始まるインスタンスメソッドが実行された場合、このクラスは `run_test` メソッドを実行する
 # - `test_` メソッドがこのクラスに実装されていなくても `test_` から始まるメッセージに応答することができる
 # - TryOver3::A1 には `test_` から始まるインスタンスメソッドが定義されていない
+class TryOver3::A1
+  def run_test; end
 
+  def method_missing(name, *args)
+    return run_test if name.start_with?('test_')
+
+    super
+  end
+end
 
 # Q2
 # 以下要件を満たす TryOver3::A2Proxy クラスを作成してください。
@@ -18,6 +26,21 @@ class TryOver3::A2
   end
 end
 
+class TryOver3::A2Proxy
+  def initialize(a2_instance)
+    @source = a2_instance
+  end
+
+  attr_reader :source
+
+  def method_missing(name, *args)
+    source.respond_to?(name) ? source.send(name, *args) : super
+  end
+
+  def respond_to_missing?(name, include_private = false)
+    source.respond_to?(name) || super
+  end
+end
 
 # Q3
 # 前回 OriginalAccessor の my_attr_accessor で定義した getter/setter に boolean の値が入っている場合には #{name}? が定義されるようなモジュールを実装しました。
@@ -35,6 +58,8 @@ module TryOver3::OriginalAccessor2
           self.class.define_method "#{attr_sym}?" do
             @attr == true
           end
+        elsif respond_to?("#{attr_sym}?")
+          self.class.undef_method("#{attr_sym}?")
         end
         @attr = value
       end
